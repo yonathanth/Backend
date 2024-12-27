@@ -29,7 +29,7 @@ jobs:
               git stash
               git pull origin main
             else
-              git clone -b main {https://github.com/yonathanth/Backend.git} .
+              git clone -b main https://github.com/yonathanth/Backend.git .
             fi
 
           
