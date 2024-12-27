@@ -25,6 +25,10 @@ app.use(cors(corsOptions));
 // Static files
 app.use("/uploads", express.static("uploads"));
 
+app.get("/", (req, res) => {
+  res.send("Api is working!");
+});
+
 // Define routes
 app.use("/api/auth", authRoutes);
 app.use("/api/employees", require("./routes/employeesRoutes"));
