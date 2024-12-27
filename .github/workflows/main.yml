@@ -1,0 +1,48 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - staging
+      - main
+      - master
+
+jobs:
+  deploy_backend:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Connect with VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            mkdir -p apps/backend && cd apps/backend
+            
+            if [ -d ".git" ]; then
+              git stash
+              git pull origin main
+            else
+              git clone -b main {https://github.com/yonathanth/Backend.git} .
+            fi
+
+          
+            npm install --force
+
+            pid=$(pm2 pid "backend-service" 2>/dev/null)
+            if [ -n "$pid" ]; then
+              echo "Reloading backend service"
+              pm2 reload "backend-service"
+              pm2 save
+            else
+              echo "Starting new backend service"
+              pm2 start npm --name "backend-service" -- start
+              pm2 startup
+              pm2 save
+            fi
