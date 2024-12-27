@@ -16,7 +16,7 @@ const calculateCountdown = (expirationDate, remainingDays) => {
 
 const fetchUserWithDetails = async (userId) => {
   if (!userId) {
-    throw new Error("User ID is required to fetch user details.");
+    throw new Error("User ID is required to fetch Member's details.");
   }
   return await prisma.user.findUnique({
     where: {
