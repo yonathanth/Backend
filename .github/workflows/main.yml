@@ -12,6 +12,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -29,7 +30,7 @@ jobs:
               git stash
               git pull origin main
             else
-              git clone -b main {https://github.com/yonathanth/Backend.git} .
+              git clone -b main https://github.com/yonathanth/Backend.git .
             fi
 
           
