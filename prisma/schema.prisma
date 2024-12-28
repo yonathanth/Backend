@@ -301,27 +301,35 @@ model MealPlan {
   duration    Int
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
-  meals       Meal[]         @relation("MealPlanMeal")
+  meals       MealPlanMeal[]
   Users       UserMealPlan[]
 }
 
 model Meal {
-  id              String       @id @default(uuid())
+  id              String         @id @default(uuid())
   name            String
-  slug            String       @unique
+  slug            String         @unique
   description     String
   category        MealCategory
   ingredients     Ingredient[]
-  instructions    String       @db.Text
+  instructions    String         @db.Text
   calories        Float?
   vegan           Boolean
   preparationTime Int
   protein         Float?
   carbs           Float?
   fats            Float?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  mealPlans       MealPlan[]   @relation("MealPlanMeal")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  mealPlans       MealPlanMeal[]
+}
+
+model MealPlanMeal {
+  id         String   @id @default(uuid())
+  mealId     String
+  mealPlanId String
+  meal       Meal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
 }
 
 model Ingredient {
@@ -329,7 +337,7 @@ model Ingredient {
   name     String
   quantity String?
   mealId   String
-  meal     Meal    @relation(fields: [mealId], references: [id])
+  meal     Meal    @relation(fields: [mealId], references: [id], onDelete: Cascade)
 }
 
 enum MealCategory {

@@ -5,7 +5,7 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "../frontend/public/images/meals");
+    cb(null, "uploads/meals");
   },
   filename: (req, file, cb) => {
     if (!req.body.slug) {
@@ -22,7 +22,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png|gif/;
     const extname = fileTypes.test(
-      path.extname(file.originalname).toLowerCase()
+        path.extname(file.originalname).toLowerCase()
     );
     const mimeType = fileTypes.test(file.mimetype);
     if (mimeType && extname) {
@@ -40,15 +40,15 @@ const getMeals = asyncHandler(async (req, res) => {
 
     if (!meals || meals.length === 0) {
       return res
-        .status(404)
-        .json({ success: false, message: "No meals found" });
+          .status(404)
+          .json({ success: false, message: "No meals found" });
     }
 
     res.status(200).json({ success: true, data: { meals } });
   } catch (error) {
     res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+        .status(500)
+        .json({ success: false, message: "Server error", error: error.message });
   }
 });
 
@@ -62,14 +62,14 @@ const getMeal = asyncHandler(async (req, res) => {
     });
     if (!meal) {
       return res
-        .status(404)
-        .json({ success: false, message: "Meal not found" });
+          .status(404)
+          .json({ success: false, message: "Meal not found" });
     }
     res.status(200).json({ success: true, data: { meal } });
   } catch (error) {
     res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+        .status(500)
+        .json({ success: false, message: "Server error", error: error.message });
   }
 });
 
@@ -90,10 +90,13 @@ const createMeal = asyncHandler(async (req, res) => {
   } = req.body;
   try {
     const parsedIngredients = ingredients ? JSON.parse(ingredients) : [];
+    const formattedSlug = slug.trim().toLowerCase().replace(/\s+/g, '-');
+    const fileExtension = path.extname(req.file.originalname).toLowerCase();
+    const slugWithExtension = `${formattedSlug}${fileExtension}`;
     const newMeal = await prisma.meal.create({
       data: {
         name,
-        slug,
+        slug: slugWithExtension,
         description,
         category,
         instructions,
@@ -191,6 +194,7 @@ const updateMeal = asyncHandler(async (req, res) => {
 });
 
 const deleteMeal = asyncHandler(async (req, res) => {
+  console.log("yes")
   const { id } = req.params;
   try {
     const mealExists = await prisma.meal.findUnique({

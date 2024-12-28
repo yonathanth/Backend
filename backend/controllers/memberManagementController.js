@@ -46,6 +46,10 @@ const fetchUserWithDetails = async (userId) => {
       id: userId,
     },
     include: {
+      exercisesCompleted:true,
+      workouts:true,
+      mealPlans:true,
+      notifications:true,
       bmis: true,
       attendance: true,
       service: {

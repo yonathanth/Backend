@@ -275,7 +275,7 @@ const addUser = [
         currentStreak,
         highestStreak,
         notifications: {
-          connect: exercisesCompleted
+          connect: notifications
             ? notifications.map((notification) => ({
                 id: notification.id,
               }))

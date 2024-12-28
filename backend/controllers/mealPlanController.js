@@ -5,7 +5,7 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "../frontend/public/images/mealPlans");
+    cb(null, "uploads/mealPlans");
   },
   filename: (req, file, cb) => {
     if (!req.body.slug) {
@@ -22,7 +22,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png|gif/;
     const extname = fileTypes.test(
-      path.extname(file.originalname).toLowerCase()
+        path.extname(file.originalname).toLowerCase()
     );
     const mimeType = fileTypes.test(file.mimetype);
     if (mimeType && extname) {
@@ -35,21 +35,35 @@ const upload = multer({
 const getMealPlans = asyncHandler(async (req, res) => {
   try {
     const mealPlans = await prisma.mealPlan.findMany({
-      include: { meals: true },
+      include: {
+        meals: {
+          include: {
+            meal: true, // Include the actual Meal data
+          },
+        },
+      },
     });
+
+    // Transform the data to include the meals directly in the mealPlan object
+    const transformedMealPlans = mealPlans.map((mealPlan) => ({
+      ...mealPlan,
+      meals: mealPlan.meals.map((mpm) => mpm.meal), // Extract actual Meal data
+    }));
+
     res.status(200).json({
       success: true,
-      data: { mealPlans },
+      data: {mealPlans :transformedMealPlans},
     });
   } catch (error) {
     console.error("Error fetching meal plans:", error);
     res.status(500).json({
       success: false,
       message:
-        "An error occurred while fetching meal plans. Please try again later.",
+          "An error occurred while fetching meal plans. Please try again later.",
     });
   }
 });
+
 
 const getMealPlan = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -58,25 +72,46 @@ const getMealPlan = asyncHandler(async (req, res) => {
       where: {
         id,
       },
-      include: { meals: true },
+      include: {
+        meals: {
+          include: {
+            meal: true,
+          },
+        },
+      },
     });
+
     if (!mealPlan) {
       return res
-        .status(404)
-        .json({ success: false, message: "Meal Plan not found" });
+          .status(404)
+          .json({ success: false, message: "Meal Plan not found" });
     }
-    res.status(200).json({ success: true, data: { mealPlan } });
+
+    const transformedMealPlan = {
+      ...mealPlan,
+      meals: mealPlan.meals.map((mpm) => mpm.meal),
+    };
+
+    res.status(200).json({ success: true, data: {mealPlan :transformedMealPlan} });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+    console.error("Error fetching meal plan:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching the meal plan.",
+      error: error.message,
+    });
   }
 });
+
+
+
 const createMealPlan = asyncHandler(async (req, res) => {
   const { name, slug, description, category, mainGoal, duration, meals } =
-    req.body;
-
+      req.body;
   try {
+    const formattedSlug = slug.trim().toLowerCase().replace(/\s+/g, '-');
+    const fileExtension = path.extname(req.file.originalname).toLowerCase();
+    const slugWithExtension = `${formattedSlug}${fileExtension}`;
     let parsedMeals = [];
     if (meals) {
       try {
@@ -88,13 +123,13 @@ const createMealPlan = asyncHandler(async (req, res) => {
         });
       }
     }
-
     if (!Array.isArray(parsedMeals)) {
       return res.status(400).json({
         success: false,
         message: "meal Ids must be an array",
       });
     }
+
     if (parsedMeals && parsedMeals.length > 0) {
       const existingMeals = await prisma.meal.findMany({
         where: {
@@ -103,27 +138,34 @@ const createMealPlan = asyncHandler(async (req, res) => {
           },
         },
       });
+      console.log(existingMeals)
       if (existingMeals.length !== parsedMeals.length) {
         return res.status(404).json({
           success: false,
           message: "One or more meal IDs are invalid.",
         });
       }
-
+      console.log(parsedMeals.length)
       // Create the MealPlan and connect the existing meals
       const newMealPlan = await prisma.mealPlan.create({
         data: {
           name,
-          slug,
+          slug: slugWithExtension,
           description,
           category,
           mainGoal,
           duration: parseInt(duration),
-          meals: {
-            connect: parsedMeals.map((mealId) => ({ id: mealId })), // Use connect for existing records
-          },
         },
       });
+      const mealPlanMeals = parsedMeals.map((mealId) => ({
+        mealPlanId: newMealPlan.id,
+        mealId,
+      }));
+
+      await prisma.mealPlanMeal.createMany({
+        data: mealPlanMeals,
+      });
+
 
       return res.status(201).json({
         success: true,
@@ -149,7 +191,7 @@ const createMealPlan = asyncHandler(async (req, res) => {
 const updateMealPlan = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, slug, description, category, mainGoal, duration, meals } =
-    req.body;
+      req.body;
 
   try {
     const mealPlanExists = await prisma.mealPlan.findUnique({

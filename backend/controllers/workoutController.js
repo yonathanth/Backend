@@ -12,7 +12,7 @@ const getWorkouts = asyncHandler(async (req, res) => {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "../frontend/public/images/workouts");
+    cb(null, "uploads/workouts/");
   },
   filename: (req, file, cb) => {
     if (!req.body.slug) {
@@ -29,7 +29,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png|gif/;
     const extname = fileTypes.test(
-      path.extname(file.originalname).toLowerCase()
+        path.extname(file.originalname).toLowerCase()
     );
     const mimeType = fileTypes.test(file.mimetype);
     if (mimeType && extname) {
@@ -50,14 +50,14 @@ const getWorkout = asyncHandler(async (req, res) => {
     });
     if (!workout) {
       return res
-        .status(404)
-        .json({ success: false, message: "Workout not found" });
+          .status(404)
+          .json({ success: false, message: "Workout not found" });
     }
     res.status(200).json({ success: true, data: { workout } });
   } catch (error) {
     res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+        .status(500)
+        .json({ success: false, message: "Server error", error: error.message });
   }
 });
 const createWorkout = asyncHandler(async (req, res) => {
@@ -75,6 +75,9 @@ const createWorkout = asyncHandler(async (req, res) => {
   } = req.body;
 
   try {
+    const formattedSlug = slug.trim().toLowerCase().replace(/\s+/g, '-');
+    const fileExtension = path.extname(req.file.originalname).toLowerCase();
+    const slugWithExtension = `${formattedSlug}${fileExtension}`;
     let parsedExercises = [];
     if (exercises) {
       try {
@@ -110,7 +113,7 @@ const createWorkout = asyncHandler(async (req, res) => {
       const newWorkout = await prisma.workout.create({
         data: {
           name,
-          slug,
+          slug: slugWithExtension,
           difficulty,
           mainGoal,
           workoutType,
