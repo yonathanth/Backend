@@ -5,7 +5,7 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "../frontend/public/images/exercises");
+    cb(null, "uploads/exercises/");
   },
   filename: (req, file, cb) => {
     if (!req.body.slug) {
@@ -22,7 +22,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png|gif/;
     const extname = fileTypes.test(
-      path.extname(file.originalname).toLowerCase()
+        path.extname(file.originalname).toLowerCase()
     );
     const mimeType = fileTypes.test(file.mimetype);
     if (mimeType && extname) {
@@ -38,15 +38,15 @@ const getExercises = asyncHandler(async (req, res) => {
 
     if (!exercises || exercises.length === 0) {
       return res
-        .status(404)
-        .json({ success: false, message: "No exercises found" });
+          .status(404)
+          .json({ success: false, message: "No exercises found" });
     }
 
     res.status(200).json({ success: true, data: { exercises } });
   } catch (error) {
     res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+        .status(500)
+        .json({ success: false, message: "Server error", error: error.message });
   }
 });
 
@@ -60,19 +60,18 @@ const getExercise = asyncHandler(async (req, res) => {
     });
     if (!exercise) {
       return res
-        .status(404)
-        .json({ success: false, message: "Exercise not found" });
+          .status(404)
+          .json({ success: false, message: "Exercise not found" });
     }
     res.status(200).json({ success: true, data: { exercise } });
   } catch (error) {
     res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+        .status(500)
+        .json({ success: false, message: "Server error", error: error.message });
   }
 });
 
 const createExercise = asyncHandler(async (req, res) => {
-  console.log(req.body);
   const {
     name,
     slug,
@@ -85,11 +84,14 @@ const createExercise = asyncHandler(async (req, res) => {
     equipments,
   } = req.body;
   try {
+    const formattedSlug = slug.trim().toLowerCase().replace(/\s+/g, '-');
+    const fileExtension = path.extname(req.file.originalname).toLowerCase();
+    const slugWithExtension = `${formattedSlug}${fileExtension}`;
     const parsedEquipments = equipments ? JSON.parse(equipments) : [];
     const newExercise = await prisma.exercise.create({
       data: {
         name,
-        slug,
+        slug: slugWithExtension,
         description,
         reps: reps ? parseInt(reps) : null,
         sets: sets ? parseInt(sets) : null,
@@ -98,9 +100,9 @@ const createExercise = asyncHandler(async (req, res) => {
         focusArea,
         equipments: {
           create:
-            parsedEquipments?.map((equipment) => ({
-              name: equipment.name,
-            })) || [],
+              parsedEquipments?.map((equipment) => ({
+                name: equipment.name,
+              })) || [],
         },
       },
     });

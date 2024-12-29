@@ -18,15 +18,15 @@ const markAsCompleted = asyncHandler(async (req, res) => {
     const lastWorkoutDate = user.lastWorkoutDate;
     const today = new Date().toISOString().split("T")[0];
     const isNewStreak =
-      lastWorkoutDate && lastWorkoutDate.toISOString().split("T")[0] === today;
+        lastWorkoutDate && lastWorkoutDate.toISOString().split("T")[0] === today;
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         lastWorkoutDate: new Date(),
         currentStreak: isNewStreak ? user.currentStreak + 1 : 1,
         highestStreak: Math.max(
-          user.highestStreak,
-          isNewStreak ? user.currentStreak + 1 : 1
+            user.highestStreak,
+            isNewStreak ? user.currentStreak + 1 : 1
         ),
       },
     });

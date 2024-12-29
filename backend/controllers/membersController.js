@@ -275,7 +275,7 @@ const addUser = [
         currentStreak,
         highestStreak,
         notifications: {
-          connect: exercisesCompleted
+          connect: notifications
             ? notifications.map((notification) => ({
                 id: notification.id,
               }))
@@ -342,7 +342,6 @@ const editUser = [
       highestStreak,
       isComplete,
     } = req.body;
-
     const parsedHeight = height ? parseFloat(height) : undefined;
     const parsedWeight = weight ? parseFloat(weight) : undefined;
 
@@ -411,20 +410,24 @@ const editUser = [
       }
       daysLeft = service.maxDays;
     }
-
+    console.log(parsedHeight, parsedWeight)
     // Append a new BMI if height or weight is changed
     if (
       (parsedHeight && parsedHeight !== user.height) ||
       (parsedWeight && parsedWeight !== user.weight)
     ) {
+      console.log(parsedHeight, parsedWeight)
+
       const newBmi =
-        parsedWeight && parsedHeight ? parsedWeight / parsedHeight ** 2 : 0;
-      await prisma.bmi.create({
-        data: {
-          userId: user.id,
-          value: newBmi,
-        },
-      });
+        parsedWeight && parsedHeight ? parsedWeight / (parsedHeight/100) ** 2 : 0;
+      if (newBmi !== 0){
+        await prisma.bmi.create({
+          data: {
+            userId: user.id,
+            value: newBmi,
+          },
+        });
+      }
     }
 
     // Update user details
