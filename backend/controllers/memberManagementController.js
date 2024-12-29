@@ -41,15 +41,16 @@ const fetchUserWithDetails = async (userId) => {
   if (!userId) {
     throw new Error("User ID is required to fetch user details.");
   }
-  return await prisma.user.findUnique({
+
+  const user = await prisma.user.findUnique({
     where: {
       id: userId,
     },
     include: {
-      exercisesCompleted:true,
-      workouts:true,
-      mealPlans:true,
-      notifications:true,
+      exercisesCompleted: true,
+      workouts: true,
+      mealPlans: true,
+      notifications: true,
       bmis: true,
       attendance: true,
       service: {
@@ -62,7 +63,14 @@ const fetchUserWithDetails = async (userId) => {
       healthCondition: true, // Include health condition if needed
     },
   });
+
+  if (user && user.bmis) {
+    user.bmis.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  }
+
+  return user;
 };
+
 
 // Get user profile with attendance details, countdown, profile picture, and status check
 const getUserProfile = asyncHandler(async (req, res) => {
