@@ -7,9 +7,9 @@ const generateBarcode = async (userId) => {
     const barcodeBuffer = await bwipjs.toBuffer({
       bcid: "code128",
       text: userId,
-      scale: 1,
+      scale: 0.5,
       height: 10,
-      includetext: true,
+      includetext: false,
     });
     return `data:image/png;base64,${barcodeBuffer.toString("base64")}`;
   } catch (error) {
