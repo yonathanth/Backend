@@ -9,7 +9,7 @@ const generateBarcode = async (userId) => {
       text: userId,
       scale: 1,
       height: 10,
-      includetext: false,
+      includetext: true,
     });
     return `data:image/png;base64,${barcodeBuffer.toString("base64")}`;
   } catch (error) {
@@ -70,7 +70,6 @@ const fetchUserWithDetails = async (userId) => {
 
   return user;
 };
-
 
 // Get user profile with attendance details, countdown, profile picture, and status check
 const getUserProfile = asyncHandler(async (req, res) => {
