@@ -107,7 +107,7 @@ model HealthCondition {
 }
 
 model User {
-  id                   String                @id @default(uuid())
+  id                   String                @id @default(cuid())
   fullName             String
   gender               String
   phoneNumber          String                @unique
