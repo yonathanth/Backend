@@ -33,7 +33,6 @@ const upload = multer({
 });
 
 const getMealPlans = asyncHandler(async (req, res) => {
-  try {
     const mealPlans = await prisma.mealPlan.findMany({
       include: {
         meals: {
@@ -54,14 +53,6 @@ const getMealPlans = asyncHandler(async (req, res) => {
       success: true,
       data: {mealPlans :transformedMealPlans},
     });
-  } catch (error) {
-    console.error("Error fetching meal plans:", error);
-    res.status(500).json({
-      success: false,
-      message:
-          "An error occurred while fetching meal plans. Please try again later.",
-    });
-  }
 });
 
 
