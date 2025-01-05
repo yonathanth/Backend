@@ -70,6 +70,8 @@ const getUsers = asyncHandler(async (req, res) => {
       createdAt: "desc",
     },
     include: {
+      service: true,
+
       exercisesCompleted: true,
       attendance: true,
       workouts: true,
@@ -410,17 +412,19 @@ const editUser = [
       }
       daysLeft = service.maxDays;
     }
-    console.log(parsedHeight, parsedWeight)
+    console.log(parsedHeight, parsedWeight);
     // Append a new BMI if height or weight is changed
     if (
       (parsedHeight && parsedHeight !== user.height) ||
       (parsedWeight && parsedWeight !== user.weight)
     ) {
-      console.log(parsedHeight, parsedWeight)
+      console.log(parsedHeight, parsedWeight);
 
       const newBmi =
-        parsedWeight && parsedHeight ? parsedWeight / (parsedHeight/100) ** 2 : 0;
-      if (newBmi !== 0){
+        parsedWeight && parsedHeight
+          ? parsedWeight / (parsedHeight / 100) ** 2
+          : 0;
+      if (newBmi !== 0) {
         await prisma.bmi.create({
           data: {
             userId: user.id,
@@ -659,7 +663,7 @@ const addUserMealPlan = asyncHandler(async (req, res) => {
     success: true,
     message: "Meal Plan added to user successfully.",
     data: userMealPlan,
-    user: updatedUser
+    user: updatedUser,
   });
 });
 
@@ -699,36 +703,39 @@ const getMyWorkouts = asyncHandler(async (req, res) => {
   }
 });
 
-
 const getMyMealPlans = asyncHandler(async (req, res) => {
-    const {id} = req.params; // userId
-    try {
-        const user = await prisma.user.findUnique({where: {id}});
-        if (!user) {
-            return res.status(404).json({success: false, message: "User not found."});
-        }
-
-        const userMealPlans = await prisma.userMealPlan.findMany({
-            where: {userId: id},
-            include: {
-                MealPlan: true,
-            },
-        });
-      console.log(userMealPlans)
-        const mealPlans = userMealPlans.map((userMealPlan) => userMealPlan.MealPlan);
-
-        res.status(200).json({
-            success: true,
-            data: mealPlans, // Return only the workouts
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: "Server error",
-            error: error.message,
-        });
+  const { id } = req.params; // userId
+  try {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
     }
+
+    const userMealPlans = await prisma.userMealPlan.findMany({
+      where: { userId: id },
+      include: {
+        MealPlan: true,
+      },
+    });
+    console.log(userMealPlans);
+    const mealPlans = userMealPlans.map(
+      (userMealPlan) => userMealPlan.MealPlan
+    );
+
+    res.status(200).json({
+      success: true,
+      data: mealPlans, // Return only the workouts
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
 });
 
 const updateNotification = asyncHandler(async (req, res) => {
@@ -784,14 +791,14 @@ const updateNotification = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-    getUsers,
-    getUserDetails,
-    addUser,
-    editUser,
-    deleteUser,
-    getMyWorkouts,
-    getMyMealPlans,
-    addUserWorkout,
-    addUserMealPlan,
-    updateNotification
+  getUsers,
+  getUserDetails,
+  addUser,
+  editUser,
+  deleteUser,
+  getMyWorkouts,
+  getMyMealPlans,
+  addUserWorkout,
+  addUserMealPlan,
+  updateNotification,
 };
