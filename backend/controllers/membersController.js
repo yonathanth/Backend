@@ -421,9 +421,7 @@ const editUser = [
       console.log(parsedHeight, parsedWeight);
 
       const newBmi =
-        parsedWeight && parsedHeight
-          ? parsedWeight / (parsedHeight / 100) ** 2
-          : 0;
+        parsedWeight && parsedHeight ? parsedWeight / parsedHeight ** 2 : 0;
       if (newBmi !== 0) {
         await prisma.bmi.create({
           data: {
