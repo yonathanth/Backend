@@ -8,7 +8,7 @@ const {
 
 router.get("/", getMealPlans);
 router.get("/:id", getMealPlan)
-router.post("/add",upload.single("image"), createMealPlan);
+router.post("/add", upload.single("image"), createMealPlan);
 router.patch("/:id", updateMealPlan);
 router.delete("/:id", deleteMealPlan);
 
