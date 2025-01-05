@@ -5,7 +5,7 @@ const bwipjs = require("bwip-js");
 const generateBarcode = async (userId) => {
   try {
     const barcodeBuffer = await bwipjs.toBuffer({
-      bcid: "code128  ", // Barcode type
+      bcid: "code128", // Barcode type
       text: userId, // Text to encode
       scale: 2, // Scale factor (larger value makes it less compact)
       height: 20, // Height of the bars in the barcode
