@@ -5,11 +5,13 @@ const bwipjs = require("bwip-js");
 const generateBarcode = async (userId) => {
   try {
     const barcodeBuffer = await bwipjs.toBuffer({
-      bcid: "code128",
-      text: userId,
-      scale: 0.5,
-      height: 10,
-      includetext: false,
+      bcid: "code128  ", // Barcode type
+      text: userId, // Text to encode
+      scale: 2, // Scale factor (larger value makes it less compact)
+      height: 20, // Height of the bars in the barcode
+      includetext: true, // Include human-readable text
+      textxalign: "center", // Center the text
+      textsize: 12, // Size of the included text
     });
     return `data:image/png;base64,${barcodeBuffer.toString("base64")}`;
   } catch (error) {
