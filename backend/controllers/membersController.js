@@ -287,7 +287,7 @@ const addUser = [
     });
 
     // Add initial BMI record
-    await prisma.bmi.create({
+    await prisma.bmis.create({
       data: {
         userId: newUser.id,
         value: calculatedBmi,
@@ -423,7 +423,7 @@ const editUser = [
       const newBmi =
         parsedWeight && parsedHeight ? parsedWeight / parsedHeight ** 2 : 0;
       if (newBmi !== 0) {
-        await prisma.bmi.create({
+        await prisma.bmis.create({
           data: {
             userId: user.id,
             value: newBmi,
