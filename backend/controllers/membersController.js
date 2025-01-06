@@ -36,10 +36,21 @@ const upload = multer({
   },
 });
 
+// Helper function to calculate days between two dates
+const calculateDaysBetween = (date1, date2) =>
+  Math.ceil((date2 - date1) / (1000 * 3600 * 24));
+
 // Helper function to validate date format (YYYY-MM-DD)
 const isValidDate = (dateStr) => {
   const date = new Date(dateStr);
   return !isNaN(date.getTime()) && dateStr === date.toISOString().split("T")[0];
+};
+
+// Helper function to calculate countdown
+const calculateCountdown = (expirationDate, remainingDays) => {
+  const today = new Date();
+  const daysUntilExpiration = calculateDaysBetween(today, expirationDate);
+  return Math.min(daysUntilExpiration, remainingDays);
 };
 
 const getUserDetails = asyncHandler(async (req, res) => {
@@ -228,7 +239,9 @@ const addUser = [
       profileImageUrl = `/uploads/users/${req.file.filename}`;
     }
 
-    const daysLeft = service.maxDays;
+    const expirationDate = new Date(user.startDate || new Date());
+    expirationDate.setDate(expirationDate.getDate() + service.period);
+    const daysLeft = calculateCountdown(expirationDate, service.maxDays);
 
     // Create the new user
     const newUser = await prisma.user.create({
@@ -402,6 +415,8 @@ const editUser = [
     // Validate and retrieve service if serviceId is updated
     let service = null;
     let daysLeft = user.daysLeft;
+    const expirationDate = new Date(user.startDate || new Date());
+    expirationDate.setDate(expirationDate.getDate() + service.period);
     if (serviceId) {
       service = await prisma.service.findUnique({ where: { id: serviceId } });
       if (!service) {
@@ -410,7 +425,7 @@ const editUser = [
           message: `Invalid service ID: ${serviceId}.`,
         });
       }
-      daysLeft = service.maxDays;
+      daysLeft = calculateCountdown(expirationDate, service.maxDays);
     }
     console.log(parsedHeight, parsedWeight);
     // Append a new BMI if height or weight is changed
