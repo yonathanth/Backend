@@ -207,7 +207,12 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     }
 
     // Reset other relevant fields
-    countdown = await calculateDaysLeft(service, updateData.startDate, 0, id);
+    const countdown = await calculateDaysLeft(
+      service,
+      updateData.startDate,
+      0,
+      id
+    );
     updateData.daysLeft = countdown;
     updateData.freezeDate = null;
     updateData.preFreezeAttendance = 0;
