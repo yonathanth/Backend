@@ -184,7 +184,7 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: "User not found" });
   }
 
-  const { service, preFreezeAttendance } = user; // Fetch daysLeft from user data
+  const { daysLeft, service, preFreezeAttendance } = user; // Fetch daysLeft from user data
 
   // Initialize update data
   const updateData = { status };
@@ -243,13 +243,6 @@ const updateUserStatus = asyncHandler(async (req, res) => {
 
   // Update user
 
-  const daysLeft = calculateDaysLeft(
-    service,
-    startDate,
-    preFreezeAttendance,
-    id
-  );
-  updateData.daysLeft = daysLeft;
   const updatedUser = await prisma.user.update({
     where: { id },
     data: updateData,
