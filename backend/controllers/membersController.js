@@ -414,8 +414,7 @@ const editUser = [
 
     // Validate and retrieve service if serviceId is updated
     let service = null;
-    const expirationDate = new Date(user.startDate || new Date());
-    expirationDate.setDate(expirationDate.getDate() + service.period);
+
     if (serviceId) {
       service = await prisma.service.findUnique({ where: { id: serviceId } });
       if (!service) {
