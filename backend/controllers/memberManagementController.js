@@ -38,7 +38,12 @@ const calculateCountdown = (expirationDate, remainingDays) => {
   return Math.min(daysUntilExpiration, remainingDays);
 };
 
-const calculateDaysLeft = (service, startDate,preFreezeAttendance, id) => {
+const calculateDaysLeft = async (
+  service,
+  startDate,
+  preFreezeAttendance,
+  id
+) => {
   const expirationDate = new Date(startDate);
   expirationDate.setDate(expirationDate.getDate() + service.period);
 
@@ -50,9 +55,7 @@ const calculateDaysLeft = (service, startDate,preFreezeAttendance, id) => {
     service.maxDays - attendanceCountSinceStart - preFreezeAttendance;
 
   return calculateCountdown(expirationDate, remainingDays);
-  
-
-}
+};
 
 // Fetch user with attendance, service, and profile picture details
 const fetchUserWithDetails = async (userId) => {
@@ -117,7 +120,12 @@ const getUserProfile = asyncHandler(async (req, res) => {
       data: { ...user, barcode },
     });
   }
-  const daysLeft = calculateDaysLeft(service, startDate, preFreezeAttendance, id);
+  const daysLeft = await calculateDaysLeft(
+    service,
+    startDate,
+    preFreezeAttendance,
+    id
+  );
 
   // Update countdown and auto-deactivate status if countdown is below zero
   await prisma.user.update({
@@ -163,7 +171,7 @@ const updateUserStatus = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id },
     select: {
-      service: true
+      service: true,
       daysLeft: true,
       startDate: true,
       freezeDate: true,
@@ -176,7 +184,7 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: "User not found" });
   }
 
-  const { daysLeft, service,preFreezeAttendance, startDate } = user; // Fetch daysLeft from user data
+  const { service, preFreezeAttendance } = user; // Fetch daysLeft from user data
 
   // Initialize update data
   const updateData = { status };
@@ -199,8 +207,8 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     }
 
     // Reset other relevant fields
-    const daysLeft = calculateDaysLeft(service, updateData.startDate, 0, id);
-  updateData.daysLeft = daysLeft;
+    countdown = await calculateDaysLeft(service, updateData.startDate, 0, id);
+    updateData.daysLeft = countdown;
     updateData.freezeDate = null;
     updateData.preFreezeAttendance = 0;
     updateData.preFreezeDaysCount = 0;
@@ -230,7 +238,12 @@ const updateUserStatus = asyncHandler(async (req, res) => {
 
   // Update user
 
-  const daysLeft = calculateDaysLeft(service, startDate, preFreezeAttendance, id);
+  const daysLeft = calculateDaysLeft(
+    service,
+    startDate,
+    preFreezeAttendance,
+    id
+  );
   updateData.daysLeft = daysLeft;
   const updatedUser = await prisma.user.update({
     where: { id },
