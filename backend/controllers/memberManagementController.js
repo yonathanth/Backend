@@ -120,7 +120,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       data: { ...user, barcode },
     });
   }
-  const daysLeft = await calculateDaysLeft(
+  const countdown = await calculateDaysLeft(
     service,
     startDate,
     preFreezeAttendance,
@@ -131,7 +131,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
   await prisma.user.update({
     where: { id: id },
     data: {
-      daysLeft: daysLeft,
+      daysLeft: countdown,
       ...(countdown < -3
         ? { status: "inactive" }
         : countdown < 0
