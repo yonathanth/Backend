@@ -239,7 +239,7 @@ const addUser = [
       profileImageUrl = `/uploads/users/${req.file.filename}`;
     }
 
-    const expirationDate = new Date(user.startDate || new Date());
+    const expirationDate = new Date(startDate || new Date());
     expirationDate.setDate(expirationDate.getDate() + service.period);
     const daysLeft = calculateCountdown(expirationDate, service.maxDays);
 
@@ -414,7 +414,6 @@ const editUser = [
 
     // Validate and retrieve service if serviceId is updated
     let service = null;
-    let daysLeft = user.daysLeft;
     const expirationDate = new Date(user.startDate || new Date());
     expirationDate.setDate(expirationDate.getDate() + service.period);
     if (serviceId) {
@@ -425,7 +424,6 @@ const editUser = [
           message: `Invalid service ID: ${serviceId}.`,
         });
       }
-      daysLeft = calculateCountdown(expirationDate, service.maxDays);
     }
     console.log(parsedHeight, parsedWeight);
     // Append a new BMI if height or weight is changed
