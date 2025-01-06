@@ -456,7 +456,6 @@ const editUser = [
         dob: dob ? new Date(dob) : user.dob,
         emergencyContact: emergencyContact || user.emergencyContact,
         startDate: startDate ? new Date(startDate) : user.startDate,
-        daysLeft: daysLeft ?? user.daysLeft,
         height: parsedHeight ?? user.height,
         weight: parsedWeight ?? user.weight,
         level: level || user.level,
