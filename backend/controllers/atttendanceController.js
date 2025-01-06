@@ -116,7 +116,7 @@ const recordAttendance = asyncHandler(async (req, res) => {
 
   // Recalculate remainingDays and daysLeft after attendance
   const newRemainingDays =
-    service.maxDays - attendanceCountSinceStart - preFreezeAttendance;
+    service.maxDays - (attendanceCountSinceStart + 1) - preFreezeAttendance;
   const daysLeftAfter = calculateCountdown(expirationDate, newRemainingDays);
 
   const updatedUser = await prisma.user.update({
