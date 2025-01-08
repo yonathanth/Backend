@@ -56,25 +56,35 @@ const recordAttendance = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(400).json({
       success: false,
-      message: "User  not found",
+      message: "Member  not found",
     });
   }
   if (user.status == "frozen") {
     return res.status(400).json({
       success: false,
-      message: "User is on Freeze!",
+      message:
+        "Member is on Freeze, Please Unfreeze him/ her to record attendance",
     });
   }
   if (user.status == "inactive") {
     return res.status(400).json({
       success: false,
-      message: "User is not active!",
+      message:
+        "Member is not active, Please renew his/her membership before recording attendance",
     });
   }
   if (user.status == "pending") {
     return res.status(400).json({
       success: false,
-      message: "User is not approved!",
+      message:
+        "User is not approved, please approve his/her membership before recording attendance",
+    });
+  }
+  if (user.status == "dormant") {
+    return res.status(400).json({
+      success: false,
+      message:
+        "User is not dormant, Please renew his/her membership before recording attendance",
     });
   }
   const { startDate, service, preFreezeAttendance } = user;
@@ -127,9 +137,14 @@ const recordAttendance = asyncHandler(async (req, res) => {
     },
   });
 
+  const message =
+    updatedUser.status === "expired"
+      ? "Attendance recorded but user's membership has expired. Please remind them to renew their membership."
+      : "Attendance recorded successfully";
+
   res.status(201).json({
     success: true,
-    message: "Attendance recorded successfully",
+    message,
     data: {
       totalAttendance: updatedUser.totalAttendance,
       daysLeft: updatedUser.daysLeft,
