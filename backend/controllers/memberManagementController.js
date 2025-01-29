@@ -255,4 +255,31 @@ const updateUserStatus = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { getUserProfile, updateUserStatus };
+const renewUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found.",
+    });
+  }
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data: {
+      daysLeft: 0,
+      preFreezeAttendance: 0,
+      preFreezeDaysCount: 0,
+      startDate: new Date(),
+      status: "pending",
+      freezeDate: null,
+    },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "User updated successfully.",
+    data: updatedUser,
+  });
+});
+module.exports = { getUserProfile, updateUserStatus, renewUser };
