@@ -113,7 +113,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
   const { startDate, service, preFreezeAttendance, status } = user;
 
   // Return user details immediately for statuses other than active or expired
-  if (status !== "active" && status !== "expired" && status !== "dormant") {
+  if (status !== "active" && status !== "expired") {
     const barcode = await generateBarcode(user.id); // Generate barcode
     return res.status(200).json({
       success: true,
