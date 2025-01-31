@@ -26,7 +26,7 @@ app.use(cors(corsOptions));
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {
-  res.send("Api is working now for sure!");
+  res.send("Api Up and Running!");
 });
 
 // Define routes
