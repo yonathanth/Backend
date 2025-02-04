@@ -19,7 +19,7 @@ const adjustStartDateForFreeze = (preFreezeDaysCount) => {
   return adjustedStartDate;
 };
 
-// Cron job to update user statuses
+// Cron job to update user statusess
 const updateUserStatuses = async () => {
   try {
     console.log("Starting user status update...");
