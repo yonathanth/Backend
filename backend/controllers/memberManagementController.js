@@ -51,8 +51,7 @@ const calculateDaysLeft = async (
     where: { memberId: id, date: { gte: startDate } },
   });
 
-  const remainingDays =
-    service.maxDays - attendanceCountSinceStart - preFreezeAttendance;
+  const remainingDays = service.maxDays - attendanceCountSinceStart;
 
   return calculateCountdown(expirationDate, remainingDays);
 };
@@ -151,7 +150,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
 
 const updateUserStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { status, startDate } = req.body;
+  const { status, startDate, freezeDuration } = req.body;
 
   // Validate status
   if (
@@ -225,6 +224,7 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     }
 
     // Adjust startDate by frozen duration using the calculateDaysBetween function
+    updateData.freezeDuration = 0;
     updateData.startDate = adjustStartDateForFreeze(user.preFreezeDaysCount);
     updateData.freezeDate = null;
     updateData.status = "active";
@@ -235,7 +235,7 @@ const updateUserStatus = asyncHandler(async (req, res) => {
 
     // Use the calculateDaysBetween function to calculate the days since the startDate
     const daysSinceStart = calculateDaysBetween(user.startDate, new Date());
-
+    updateData.freezeDuration = freezeDuration;
     updateData.freezeDate = new Date();
     updateData.preFreezeAttendance = attendanceCountSinceStart;
     updateData.preFreezeDaysCount = daysSinceStart;

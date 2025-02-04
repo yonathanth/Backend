@@ -12,6 +12,13 @@ const calculateCountdown = (expirationDate, remainingDays) => {
   return Math.min(daysUntilExpiration, remainingDays);
 };
 
+// Adjust start date after freeze period ends
+const adjustStartDateForFreeze = (preFreezeDaysCount) => {
+  const adjustedStartDate = new Date();
+  adjustedStartDate.setDate(adjustedStartDate.getDate() - preFreezeDaysCount);
+  return adjustedStartDate;
+};
+
 // Cron job to update user statuses
 const updateUserStatuses = async () => {
   try {
@@ -19,7 +26,7 @@ const updateUserStatuses = async () => {
 
     const users = await prisma.user.findMany({
       where: {
-        status: { in: ["active", "expired"] },
+        status: { in: ["active", "expired", "frozen"] },
       },
       include: {
         service: true,
@@ -27,12 +34,41 @@ const updateUserStatuses = async () => {
     });
 
     const updates = users.map(async (user) => {
-      const { id, fullName, startDate, service, preFreezeAttendance, status } =
-        user;
+      const {
+        id,
+        fullName,
+        startDate,
+        service,
+        preFreezeAttendance,
+        status,
+        freezeDuration,
+        freezeDate,
+        preFreezeDaysCount,
+      } = user;
 
       if (!service) {
         console.warn(`User ${id} has no active service. Skipping.`);
         return;
+      }
+
+      const updateData = {};
+      const today = new Date();
+
+      // Handle frozen users
+      if (status === "frozen" && freezeDate) {
+        const freezeEndDate = new Date(freezeDate);
+        freezeEndDate.setDate(freezeEndDate.getDate() + freezeDuration);
+
+        if (today >= freezeEndDate) {
+          updateData.freezeDuration = 0;
+          updateData.startDate = adjustStartDateForFreeze(preFreezeDaysCount);
+          updateData.freezeDate = null;
+          updateData.status = "active";
+          console.log(
+            `User ${fullName} freeze period ended. Status set to active.`
+          );
+        }
+        console.log(`User ${fullName} freeze period has not ended yet.`);
       }
 
       const expirationDate = new Date(startDate);
@@ -42,24 +78,24 @@ const updateUserStatuses = async () => {
         where: { memberId: id, date: { gte: startDate } },
       });
 
-      const remainingDays =
-        service.maxDays - attendanceCountSinceStart - preFreezeAttendance;
-
+      const remainingDays = service.maxDays - attendanceCountSinceStart;
       const countdown = calculateCountdown(expirationDate, remainingDays);
 
-      const newStatus =
-        countdown < -3 ? "inactive" : countdown < 0 ? "expired" : status;
+      if (status !== "frozen") {
+        updateData.daysLeft = countdown;
+        updateData.status =
+          countdown < -3 ? "inactive" : countdown < 0 ? "expired" : status;
+      }
 
       await prisma.user.update({
         where: { id: id },
-        data: {
-          daysLeft: countdown,
-          status: newStatus,
-        },
+        data: updateData,
       });
 
       console.log(
-        `User ${user.fullName} updated: Countdown = ${countdown}, Status = ${newStatus}`
+        `User ${fullName} updated: Countdown = ${countdown}, Status = ${
+          updateData.status || status
+        }`
       );
     });
 
