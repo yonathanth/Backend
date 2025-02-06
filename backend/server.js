@@ -48,6 +48,7 @@ app.use("/api/mealPlans", require("./routes/mealPlanRoutes"));
 app.use("/api/markAsCompleted", require("./routes/exerciseCompletionRoute"));
 app.use("/api/advertisement", require("./routes/advertisementRoutes"));
 app.use("/api/broadcast", require("./routes/broadcastRoutes"));
+app.use("/api/download", require("./routes/massDownloadRoute"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/nonActiveMembers", require("./routes/nonActiveMemberRoutes"));
 app.use(
