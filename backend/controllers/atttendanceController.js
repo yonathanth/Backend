@@ -142,7 +142,7 @@ const recordAttendance = asyncHandler(async (req, res) => {
     message,
     data: {
       totalAttendance: updatedUser.totalAttendance,
-      daysLeft: updatedUser.daysLeft,
+      name: fullName,
     },
   });
 });
