@@ -28,6 +28,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
       fullName: true,
       gender: true,
       phoneNumber: true,
+      startDate: true,
       email: true,
       address: true,
       emergencyContact: true,
