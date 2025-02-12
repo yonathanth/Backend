@@ -47,7 +47,7 @@ const recordAttendance = asyncHandler(async (req, res) => {
   if (existingAttendance) {
     return res.status(400).json({
       success: false,
-      message: "Attendance already recorded for today",
+      message: "✅ Attendance already recorded for today",
     });
   }
 
@@ -56,32 +56,32 @@ const recordAttendance = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(400).json({
       success: false,
-      message: "Member not found",
+      message: "❌ Member not found",
     });
   }
 
   if (user.status === "frozen") {
     return res.status(400).json({
       success: false,
-      message: `${user.fullName} is on Freeze. Please unfreeze them to record attendance.`,
+      message: `💠 ${user.fullName} is on Freeze. Please unfreeze them to record attendance.`,
     });
   }
   if (user.status === "inactive") {
     return res.status(400).json({
       success: false,
-      message: `${user.fullName} is inactive. Please renew their membership before recording attendance.`,
+      message: `❌ ${user.fullName} is inactive. Please renew their membership before recording attendance.`,
     });
   }
   if (user.status === "pending") {
     return res.status(400).json({
       success: false,
-      message: `${user.fullName} is not approved. Please approve their membership before recording attendance.`,
+      message: `❕${user.fullName} is not approved(pending). Please approve their membership before recording attendance.`,
     });
   }
   if (user.status === "dormant") {
     return res.status(400).json({
       success: false,
-      message: `${user.fullName} is dormant. Please renew their membership before recording attendance.`,
+      message: `❌ ${user.fullName} is dormant. Please renew their membership before recording attendance.`,
     });
   }
 
@@ -97,7 +97,7 @@ const recordAttendance = asyncHandler(async (req, res) => {
   const daysLeft = calculateCountdown(expirationDate, remainingDays);
 
   // Check if remainingDays is below -3
-  if (daysLeft <= -3) {
+  if (daysLeft < -3) {
     await prisma.user.update({
       where: { id: user.id },
       data: { status: "inactive" },
@@ -110,7 +110,7 @@ const recordAttendance = asyncHandler(async (req, res) => {
   }
 
   // Check if remainingDays is zero or less
-  else if (daysLeft <= 0) {
+  else if (daysLeft < 0) {
     await prisma.user.update({
       where: { id: user.id },
       data: { status: "expired" },
@@ -134,8 +134,8 @@ const recordAttendance = asyncHandler(async (req, res) => {
 
   const message =
     updatedUser.status === "expired"
-      ? `Attendance recorded but ${fullName}'s membership has expired. Please remind them to renew their membership.`
-      : `Attendance for ${fullName} recorded successfully`;
+      ? `❗️ Attendance recorded but ${fullName}'s membership has expired. Please remind them to renew their membership.`
+      : `✅ Attendance for ${fullName} recorded successfully`;
 
   res.status(201).json({
     success: true,
